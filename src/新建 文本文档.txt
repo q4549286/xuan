@@ -1,0 +1,46 @@
+// index.js
+import BaZi from './bazi.js';
+
+addEventListener('fetch', event => {
+  event.respondWith(handleRequest(event.request))
+})
+
+async function handleRequest(request) {
+  const url = new URL(request.url)
+
+  if (url.pathname === '/api/bazi' && request.method === 'GET') {
+    const params = url.searchParams
+    const year = parseInt(params.get('year'))
+    const month = parseInt(params.get('month'))
+    const day = parseInt(params.get('day'))
+    const hour = parseInt(params.get('hour'))
+    const minute = parseInt(params.get('minute'))
+    const second = parseInt(params.get('second'))
+
+    if (!year || !month || !day || hour === undefined || minute === undefined || second === undefined) {
+      return new Response(JSON.stringify({ error: 'Missing parameters' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+      })
+    }
+
+    const baZi = new BaZi(year, month, day, hour, minute, second)
+    // 这里可以调用更多的八字解析逻辑
+    const response = {
+      year: baZi.year,
+      month: baZi.month,
+      day: baZi.day,
+      hour: baZi.hour,
+      minute: baZi.minute,
+      second: baZi.second,
+      // 添加更多解析信息
+    }
+
+    return new Response(JSON.stringify(response), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+    })
+  }
+
+  return new Response('Not Found', { status: 404 })
+}
